@@ -43,6 +43,7 @@ async function getFreshSpotifyToken<T>(body: Record<string, string>): Promise<T>
 	}
 	return responseBody as T;
 }
+
 export default {
 	getAuthorisationCodeToken,
 	getClientCredentialsToken,

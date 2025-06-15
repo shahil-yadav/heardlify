@@ -19,5 +19,8 @@
 		"mongodb": "^4.9.0",
 		"zod": "^3.18.0"
 	},
+	"scripts": {
+		"dev": "NODE_OPTIONS=--inspect netlify dev"
+	},
 	"type": "module"
 }

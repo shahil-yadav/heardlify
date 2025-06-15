@@ -65,7 +65,7 @@ function isSpotifyId(value: string) {
 }
 
 function isDeezerId(value: string) {
-	return Number.isInteger(value);
+	return Number.isInteger(Number(value));
 }
 
 function isSpotifyPlaylistUrl(value: string) {

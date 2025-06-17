@@ -4,16 +4,20 @@ import NetlifyFunctionHelpers from '$/utils/netlify-function-helpers';
 import spotifyAccountApi from '$/utils/spotify-account-api';
 import spotifyApi from '$/utils/spotify-api';
 import { Handler } from '@netlify/functions';
+import deezerApi from '$utils/deezer-api';
+import { z } from 'zod';
+import { pl } from 'zod/dist/types/v4/locales';
 
-export type IPlaylistSummary = {
-	id: string;
-	images: { url: string }[];
-	name: string;
-	description: string;
-	owner: {
-		display_name: string;
-	};
-};
+const PlaylistSummarySchema = z.object({
+	id: z.string(),
+	images: z.object({ url: z.string() }).array(),
+	name: z.string(),
+	description: z.string(),
+	owner: z.object({ display_name: z.string() })
+});
+
+export type IPlaylistSummary = z.infer<typeof PlaylistSummarySchema>;
+
 export type ISearchPlaylistsResponse = {
 	playlists: {
 		items: IPlaylistSummary[];
@@ -34,17 +38,47 @@ function mapSpotifyObjectToDto(item: SpotifyApi.PlaylistObjectSimplified): IPlay
 	};
 }
 
+// Since the param is of type `any`, use Zod Validation
+function mapDeezerObjectToDto(item: any): IPlaylistSummary {
+	return PlaylistSummarySchema.parse({
+		id: item.id.toString(),
+		description: item.description ?? '',
+		images: [
+			item.picture,
+			item.picture_small,
+			item.picture_medium,
+			item.picture_big,
+			item.picture_xl
+		].map((url) => ({ url })),
+		name: item.title,
+		owner: {
+			display_name: item.creator.name ?? ''
+		}
+	});
+}
+
 function isSpotifyId(value: string) {
 	const spotifyIdRegexp = new RegExp(
 		'^[0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz]{22}$'
 	);
 	return spotifyIdRegexp.test(value);
 }
+
+function isDeezerId(value: string) {
+	return Number.isInteger(Number(value));
+}
+
 function isSpotifyPlaylistUrl(value: string) {
 	// e.g. 'https://open.spotify.com/playlist/1p3I3zrVPmJXbmYUcA7kJz?si=iNcr5LgOSG-JMLU6D-o84A'
 	const isUrl = value.includes('https://open.spotify.com/playlist/');
 	return isUrl;
 }
+
+function isDeezerPlaylistUrl(value: string) {
+	const regex = /^https:\/\/www\.deezer\.com\/[a-z]{2}\/playlist\/\d+$/i;
+	return regex.test(value);
+}
+
 function getPlaylistIdFromPlaylistUrl(value: string) {
 	// e.g. 'https://open.spotify.com/playlist/1p3I3zrVPmJXbmYUcA7kJz?si=iNcr5LgOSG-JMLU6D-o84A'
 	const path = new URL(value).pathname.split('/');
@@ -79,42 +113,62 @@ export const handler: Handler = async (event, { awsRequestId }) => {
 			};
 		}
 
-		const authToken = await spotifyAccountApi.getClientCredentialsToken();
+		// const authToken = await spotifyAccountApi.getClientCredentialsToken();
 
 		let results: ISearchPlaylistsResponse;
-		if (isSpotifyId(q)) {
-			const item = await spotifyApi.playlists.getOne(q, authToken.access_token);
+		if (
+			// isSpotifyId(q)
+			isDeezerId(q)
+		) {
+			// const item = await spotifyApi.playlists.getOne(q, authToken.access_token);
+			const item = await deezerApi.playlists.getOne(q);
 			results = {
 				playlists: {
-					items: [mapSpotifyObjectToDto(item)],
+					// items: [mapSpotifyObjectToDto(item)],
+					items: [mapDeezerObjectToDto(item)],
 					offset: 0,
 					total: 1
 				}
 			};
-		} else if (isSpotifyPlaylistUrl(q)) {
+		} else if (
+			// isSpotifyPlaylistUrl(q)
+			isDeezerPlaylistUrl(q)
+		) {
 			const playlistId = getPlaylistIdFromPlaylistUrl(q);
-			const item = await spotifyApi.playlists.getOne(playlistId, authToken.access_token);
+			// const item = await spotifyApi.playlists.getOne(playlistId, authToken.access_token);
+			const item = await deezerApi.playlists.getOne(playlistId);
 			results = {
 				playlists: {
-					items: [mapSpotifyObjectToDto(item)],
+					// items: [mapSpotifyObjectToDto(item)],
+					items: [mapDeezerObjectToDto(item)],
 					offset: 0,
 					total: 1
 				}
 			};
 		} else {
-			const searchResult = await spotifyApi.search.searchPlaylists(
-				authToken.access_token,
-				q,
-				offset,
-				limit
-			);
+			// const searchResult = await spotifyApi.search.searchPlaylists(
+			// 	authToken.access_token,
+			// 	q,
+			// 	offset,
+			// 	limit
+			// );
+
+			// TODO: This (if block) will throw deliberately throw error
+			const searchResult = await deezerApi.search.searchPlaylists(q, offset, limit);
 			results = {
 				playlists: {
-					items: searchResult.playlists.items.filter(Boolean).map(mapSpotifyObjectToDto),
-					offset: searchResult.playlists.offset,
-					total: searchResult.playlists.total
+					items: [],
+					offset: 0,
+					total: 0
 				}
 			};
+			// results = {
+			// 	playlists: {
+			// 		items: searchResult.playlists.items.filter(Boolean).map(mapSpotifyObjectToDto),
+			// 		offset: searchResult.playlists.offset,
+			// 		total: searchResult.playlists.total
+			// 	}
+			// };
 		}
 
 		await logs.logInfo({

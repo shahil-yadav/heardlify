@@ -7,6 +7,8 @@ import spotifyApi from '$/utils/spotify-api';
 import mongodbApi from '$/utils/mongodb-api';
 import jsonifyError from '$/utils/jsonify-error';
 import NetlifyFunctionHelpers from '$/utils/netlify-function-helpers';
+import deezerApi from '$utils/deezer-api';
+
 interface IResult {
 	answer: IDetailedOption;
 	options: IDetailedOption[];
@@ -100,13 +102,14 @@ function setResultInCache(keys: ICacheKeys, value: IResult) {
 
 async function getResultFresh(keys: ICacheKeys): Promise<IResult> {
 	const { fullDaysSinceEpoch, playlistId } = keys;
-	const authToken = await getSpotifyToken();
-	const allPlaylistTracks = await spotifyApi.playlists.getAllTracksExpensively(
-		playlistId,
-		authToken.access_token
-	);
-
-	const playlist = await spotifyApi.playlists.getOne(playlistId, authToken.access_token);
+	// const authToken = await getSpotifyToken();
+	// const allPlaylistTracks = await spotifyApi.playlists.getAllTracksExpensively(
+	// 	playlistId,
+	// 	authToken.access_token
+	// );
+	// const playlist = await spotifyApi.playlists.getOne(playlistId, authToken.access_token);
+	const allPlaylistTracks = await deezerApi.playlists.getAllTracks(playlistId);
+	const playlist = await deezerApi.playlists.getOne(playlistId);
 	const totalCount = allPlaylistTracks.length;
 
 	const index = fullDaysSinceEpoch % totalCount;
@@ -116,8 +119,10 @@ async function getResultFresh(keys: ICacheKeys): Promise<IResult> {
 		answer,
 		options: allPlaylistTracks,
 		playlist: {
-			name: playlist.name,
-			imageUrl: playlist.images[playlist.images.length - 1]?.url
+			// name: playlist.name,
+			name: playlist.title,
+			// imageUrl: playlist.images[playlist.images.length - 1]?.url
+			imageUrl: playlist.picture_xl
 		}
 	};
 

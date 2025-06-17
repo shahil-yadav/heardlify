@@ -16,9 +16,9 @@ export const load: PageLoad = async ({ params, url, fetch }) => {
 	const slug = params['playlistid'] ?? '';
 	const slugSplit = slug.split('-');
 	const playlistId = slugSplit[slugSplit.length - 1] || '0erQqpBCFFYj0gDam2pnp1';
-	if (!isSpotifyId(playlistId)) {
-		throw new Error('The given id is not a playlist id');
-	}
+	// if (!isSpotifyId(playlistId)) {
+	// 	throw new Error('The given id is not a playlist id');
+	// }
 	const localdate = queryDate ?? new Date();
 
 	const baseURL = variables.apiBasePath;

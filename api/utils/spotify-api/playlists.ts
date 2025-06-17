@@ -2,14 +2,14 @@ import fetch, { Response } from 'node-fetch';
 import { IDetailedOption } from '../option';
 import pushoverApi from '$/utils/pushover-api';
 
-function isNotNull<T>(value: T | null): value is T {
+export function isNotNull<T>(value: T | null): value is T {
 	return value !== null;
 }
 
-type WithRequired<T, K extends keyof T> = T & { [P in K]: NonNullable<T[P]> };
-function propertyIsNotNull<T, TPropKey extends keyof T>(propKey: TPropKey) {
+export type WithRequired<T, K extends keyof T> = T & { [P in K]: NonNullable<T[P]> };
+export function propertyIsNotNull<T, TPropKey extends keyof T>(propKey: TPropKey) {
 	return function (value: T): value is WithRequired<T, TPropKey> {
-		return value[propKey] !== null && value[propKey] !== undefined;
+		return value[propKey] !== null && value[propKey] !== undefined && value[propKey] !== '';
 	};
 }
 

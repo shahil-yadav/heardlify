@@ -28,7 +28,7 @@
 	const baseURL = variables.searchApiBasePath;
 
 	let input: HTMLInputElement | null = null;
-	const textvalue = persistedWritable('search', 'All Out');
+	const textvalue = persistedWritable('search', '13934751281');
 	$: {
 		if (browser) {
 			textvalue.useLocalStorage();

@@ -14,14 +14,14 @@ function getCorsHeaders(event: { headers: { origin?: string } }): Record<string,
 		'https://test.heardlify.app'
 	];
 	const origin = event.headers.origin ?? '';
-	if (ALLOWED_ORIGINS.includes(origin)) {
-		return {
-			'Access-Control-Allow-Credentials': 'true',
-			'Access-Control-Allow-Origin': origin
-		};
-	} else {
-		return {};
-	}
+	// if (ALLOWED_ORIGINS.includes(origin)) {
+	return {
+		'Access-Control-Allow-Credentials': 'true',
+		'Access-Control-Allow-Origin': origin
+	};
+	// } else {
+	// 	return {};
+	// }
 }
 function getCacheControlHeader(params: {
 	public?: boolean;

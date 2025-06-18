@@ -24,7 +24,9 @@ type ICache = {
 
 const cache: ICache = {};
 
+// TODO:
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
+//
 
 export const handler: Handler = async (event, { awsRequestId }) => {
 	const userSessionId = NetlifyFunctionHelpers.getCookie(event, 'sid');

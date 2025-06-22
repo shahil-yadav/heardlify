@@ -3,7 +3,7 @@
 	import { useInfiniteQuery } from '@sveltestack/svelte-query';
 	import { onMount } from 'svelte';
 	import { searchPlaylists } from '../../functions/search-playlists';
-	import Search from '../icons/Search.svelte';
+	import Search from '../icons/search.svelte';
 	import Times from '../icons/Times.svelte';
 	import Button from '../shared/Button.svelte';
 	import debounce from 'lodash.debounce';
@@ -136,7 +136,7 @@
 				<div class="noresult-message">
 					Couldn't find a playlist containing <br /> "{$textvalue}"
 				</div>
-		{/if}
+			{/if}
 
 			{#each pages as page}
 				{#each page.playlists.items as playlist}
@@ -149,7 +149,6 @@
 					<PlaylistSummarySkeleton style="opacity: {opacity}" />
 				{/each}
 			{/if}
-			
 		{/if}
 	</div>
 </div>
@@ -183,6 +182,7 @@
 		color: var(--color-fg);
 		font-size: inherit;
 	}
+
 	.input-container:focus-within {
 		border-color: var(--color-positive);
 	}

@@ -136,7 +136,7 @@
 				<div class="noresult-message">
 					Couldn't find a playlist containing <br /> "{$textvalue}"
 				</div>
-			{/if}
+		{/if}
 
 			{#each pages as page}
 				{#each page.playlists.items as playlist}
@@ -149,6 +149,7 @@
 					<PlaylistSummarySkeleton style="opacity: {opacity}" />
 				{/each}
 			{/if}
+			
 		{/if}
 	</div>
 </div>

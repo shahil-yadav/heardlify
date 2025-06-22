@@ -46,7 +46,7 @@
 	<h1>Heardlify</h1>
 	<div class="messages">
 		<p class="subheading">Look up any Spotify playlist and turn it into a guessing game</p>
-		<div class="subheading">🌅 Heardlify is sunsetting  🌅</div>
+		<div class="subheading">🌅 Heardlify is sunsetting 🌅</div>
 		<button class="button support" on:click={() => (sunsetModalOpen = true)}>
 			What does this mean?
 		</button>

@@ -42,16 +42,18 @@
 
 <div class="bg" />
 <div class="bg-blur" />
+
 <div class="whole-thing">
 	<h1>Heardlify</h1>
-	<div class="messages">
-		<p class="subheading">Look up any Spotify playlist and turn it into a guessing game</p>
-		<div class="subheading">🌅 Heardlify is sunsetting 🌅</div>
-		<button class="button support" on:click={() => (sunsetModalOpen = true)}>
-			What does this mean?
-		</button>
+	<p class="subheading">Look up any Spotify playlist and turn it into a <br /> guessing game</p>
+	<!-- <p class="subheading">🌅 Heardlify is sunsetting 🌅</p>
+	<button class="button support" on:click={() => (sunsetModalOpen = true)}>
+		What does this mean?
+	</button> -->
+
+	<div class="flex-center">
+		<TabGroup options={selectedTabOptions} bind:value={selectedTab} />
 	</div>
-	<TabGroup options={selectedTabOptions} bind:value={selectedTab} />
 
 	<div class="tab-panels">
 		{#key selectedTab}
@@ -68,75 +70,84 @@
 			</div>
 		{/key}
 	</div>
-	<div class="buttons">
+
+	<!-- <div class="buttons">
 		<button class="button support" on:click={() => (supportModalOpen = true)}
 			>Support the app</button
 		>
 		<button class="button feedback" on:click={() => (feedbackModalOpen = true)}>Feedback</button>
-	</div>
+	</div> -->
 </div>
-<FeedbackModal bind:open={feedbackModalOpen} />
-<SupportModal bind:open={supportModalOpen} />
-<SunsetModal bind:open={sunsetModalOpen} />
+<!-- <FeedbackModal bind:open={feedbackModalOpen} /> -->
+<!-- <SupportModal bind:open={supportModalOpen} /> -->
 
+<!-- <SunsetModal bind:open={sunsetModalOpen} /> -->
 <style>
-	:root {
-		--padding: 32px 8px;
+	.flex-center {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		margin: 17.5px;
 	}
+
+	:root {
+		--padding: 20px 8px;
+	}
+
 	@media only screen and (min-width: 600px) {
 		:root {
-			--padding: 32px 16px;
+			--padding: 20px 16px;
 		}
 	}
+
 	.bg {
-		position: absolute;
-		left: 0;
-		top: 0;
-		bottom: 0;
-		right: 0;
-		background-image: url(/home-bg-640x422.jpeg);
+		position: fixed;
+		inset: 0;
 		filter: blur(32px);
 		z-index: -2;
-		background-size: 100% 100%;
+		background-image: url(/home-bg-640x422.jpeg);
+		background-size: cover;
 		transition: background-image 2s ease-in-out;
 	}
+
 	.bg-blur {
-		position: absolute;
-		left: 0;
-		top: 0;
-		bottom: 0;
-		right: 0;
-		z-index: 0;
+		position: fixed;
+		inset: 0;
 		background-color: var(--color-overlay);
 		z-index: -1;
 	}
+
 	h1 {
 		text-align: center;
 		font-size: 3rem;
 	}
 	.messages {
-		display: flex;
+		text-align: center;
+		/* display: flex;
 		flex-direction: column;
 		justify-content: center;
-		gap: 2px;
+		gap: 2px; */
 	}
 	.subheading {
 		font-size: 1.25rem;
 		color: var(--color-line);
 		text-align: center;
 		font-weight: 300;
-		max-width: 400px;
+		/* max-width: 400px; */
 	}
+
 	.whole-thing {
+		padding: var(--padding);
 		max-width: var(--width-game);
 		margin: auto;
-		display: flex;
+
+		/* display: flex;
 		flex-direction: column;
 		align-items: center;
-		padding: var(--padding);
 		height: 100%;
-		gap: 12px;
+		gap: 12px; */
 	}
+
 	.buttons {
 		display: flex;
 		justify-content: space-around;
@@ -149,13 +160,14 @@
 		color: var(--color-line);
 	}
 	.tab-panels {
-		position: relative;
-		flex: 1;
-		width: 100%;
-		overflow: auto;
+		/* position: relative; */
+		/* flex: 1; */
+		/* width: 100%; */
+		/* overflow: auto; */
 	}
 	.tab-panel {
-		position: absolute;
-		inset: 0;
+		/* position: absolute; */
+		/* inset: 0; */
+		height: 500px;
 	}
 </style>

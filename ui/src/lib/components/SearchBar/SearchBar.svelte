@@ -2,22 +2,33 @@
 	import debounce from 'lodash.debounce';
 	import SearchIcon from '../icons/search.svelte';
 	import TimesIcon from '../icons/Times.svelte';
+	import Button from '../shared/Button.svelte';
 
 	export let query: string;
 	export let debounceTimerInMs = 600;
+	let input: HTMLInputElement;
 
 	let value = query;
 	let onDebouncedSearch = debounce((text: string) => {
 		query = text;
 	}, debounceTimerInMs);
 
+	function onClear() {
+		value = '';
+		input.focus();
+	}
+
 	$: onDebouncedSearch(value);
 </script>
 
 <div class="input-container">
-	<SearchIcon />
-	<input type="text" bind:value />
-	<TimesIcon />
+	<Button color="transparent" nopadding>
+		<SearchIcon />
+	</Button>
+	<input bind:this={input} type="text" bind:value />
+	<Button color="transparent" nopadding on:click={onClear}>
+		<TimesIcon />
+	</Button>
 </div>
 
 <style lang="scss">

@@ -19,16 +19,24 @@
 	import HelpModal from './HelpModal.svelte';
 	import Portal from 'svelte-portal/src/Portal.svelte';
 	import { getPortalContext } from '$lib/context/PortalContextProvider.svelte';
+	import { getPlaylists } from '$lib/functions/data';
+	import SearchBar from '../SearchBar/SearchBar.svelte';
+	import ScrollableContainer from '../SearchBar/ScrollableContainer.svelte';
 
 	export let date: Date;
 
 	const portal = getPortalContext();
 	let helpmodalOpen = false;
 
-	const baseURL = variables.searchApiBasePath;
+	let isScrolledContentAtBottomOfTheContainer = false;
 
-	let input: HTMLInputElement | null = null;
-	const textvalue = persistedWritable('search', '13934751281');
+	// const baseURL = variables.searchApiBasePath;
+
+	// let input: HTMLInputElement | null = null;
+	const textvalue = persistedWritable('search', '6682665064');
+
+	/*--------------------------------------------------------------------------------------------------*/
+	// TODO: IDK what this thing is doing ??
 	$: {
 		if (browser) {
 			textvalue.useLocalStorage();
@@ -39,45 +47,52 @@
 			}
 		}
 	}
+	/*--------------------------------------------------------------------------------------------------*/
 
-	const limit = 10;
-	$: queryResult = useInfiniteQuery(
-		['search', { textvalue: $textvalue }] as const,
-		async ({ pageParam = 0, queryKey }) => {
-			return $textvalue
-				? await searchPlaylists(baseURL, queryKey[1].textvalue, pageParam, limit)
-				: Promise.resolve({ playlists: { items: [], offset: 0, total: 0 } });
-		},
-		{
-			getNextPageParam: (lastGroup) => {
-				if (!lastGroup.playlists) return undefined;
-				const next = lastGroup.playlists.offset + limit;
-				return next < lastGroup.playlists.total ? next : undefined;
-			}
-		}
-	);
+	/*--------------------------------------------------------------------------------------------------*/
+	// const limit = 10;
+	// $: queryResult = useInfiniteQuery(
+	// 	['search', { textvalue: $textvalue }] as const,
+	// 	async ({ pageParam = 0, queryKey }) => {
+	// 		return $textvalue
+	// 			? await searchPlaylists(baseURL, queryKey[1].textvalue, pageParam, limit)
+	// 			: Promise.resolve({ playlists: { items: [], offset: 0, total: 0 } });
+	// 	},
+	// 	{
+	// 		getNextPageParam: (lastGroup) => {
+	// 			if (!lastGroup.playlists) return undefined;
+	// 			const next = lastGroup.playlists.offset + limit;
+	// 			return next < lastGroup.playlists.total ? next : undefined;
+	// 		}
+	// 	}
+	// );
+	$: queryResult = getPlaylists({ query: $textvalue });
+	/*--------------------------------------------------------------------------------------------------*/
+
 	$: pages = $queryResult.data?.pages ?? [];
-	async function load() {}
-	function clear() {
-		$textvalue = '';
-		input?.focus();
-	}
 
-	onMount(() => {
-		load();
-	});
+	// async function load() {}
+	// function clear() {
+	// 	$textvalue = '';
+	// 	input?.focus();
+	// }
 
-	let container: HTMLDivElement | null = null;
-	$: {
-		if (container) {
-			const { scrollTop, clientHeight, scrollHeight } = container;
-			if (scrollTop >= scrollHeight - clientHeight) {
-				if ($queryResult.hasNextPage && !$queryResult.isFetchingNextPage) {
-					$queryResult.fetchNextPage();
-				}
-			}
-		}
-	}
+	// onMount(() => {
+	// 	load();
+	// });
+
+	// let container: HTMLDivElement | null = null;
+	// $: {
+	// 	if (container) {
+	// 		const { scrollTop, clientHeight, scrollHeight } = container;
+	// 		if (scrollTop >= scrollHeight - clientHeight) {
+	// 			if ($queryResult.hasNextPage && !$queryResult.isFetchingNextPage) {
+	// 				$queryResult.fetchNextPage();
+	// 			}
+	// 		}
+	// 	}
+	// }
+
 	$: {
 		if ($textvalue === '/time') {
 			let message = '';
@@ -98,17 +113,20 @@
 			goto('/stats');
 		}
 	}
-	const handleInput = debounce((newvalue: string) => {
-		$textvalue = newvalue;
-	}, 600);
+
+	// const handleInput = debounce((newvalue: string) => {
+	// 	$textvalue = newvalue;
+	// }, 600);
 </script>
 
 <Portal target="body">
 	<HelpModal bind:open={helpmodalOpen} />
 </Portal>
+
 <div class="whole-thing">
 	<div style="width: 100%">
-		<div class="input-container">
+		<!-- ------------------------------------------------------------------------------------ -->
+		<!-- <div class="input-container">
 			<Search />
 			<input
 				class="input"
@@ -121,36 +139,42 @@
 			{#if $textvalue}
 				<Button color="transparent" nopadding on:click={clear}><Times /></Button>
 			{/if}
-		</div>
+		</div> -->
+		<SearchBar bind:query={$textvalue} />
+		<!-- ------------------------------------------------------------------------------------ -->
 		<button class="help-link" on:click={() => (helpmodalOpen = true)}
 			>Still can't find your playlist?</button
 		>
 	</div>
 
-	<div class="playlists" bind:this={container} on:scroll={() => (container = container)}>
-		{#if !$textvalue}
-			<div class="noresult-message">Start typing to find a Spotify playlist to Heardlify</div>
-		{/if}
-		{#if $textvalue}
-			{#if pages[0]?.playlists.items.length < 1}
-				<div class="noresult-message">
-					Couldn't find a playlist containing <br /> "{$textvalue}"
-				</div>
+	<!-- TODO - Test more with real scrollable date once more -->
+	<ScrollableContainer bind:isScrolledContentAtBottomOfTheContainer>
+		<!-- <div class="playlists" bind:this={container} on:scroll={() => (container = container)}> -->
+		<div class="playlists">
+			{#if !$textvalue}
+				<div class="noresult-message">Start typing to find a Spotify playlist to Heardlify</div>
 			{/if}
+			{#if $textvalue}
+				{#if pages[0]?.playlists.items.length < 1}
+					<div class="noresult-message">
+						Couldn't find a playlist containing <br /> "{$textvalue}"
+					</div>
+				{/if}
 
-			{#each pages as page}
-				{#each page.playlists.items as playlist}
-					<PlaylistSummary {playlist} {date} />
+				{#each pages as page}
+					{#each page.playlists.items as playlist}
+						<PlaylistSummary {playlist} {date} />
+					{/each}
 				{/each}
-			{/each}
 
-			{#if $queryResult.isLoading || $queryResult.isFetchingNextPage}
-				{#each [1, 0.5, 0.25, 0.1] as opacity}
-					<PlaylistSummarySkeleton style="opacity: {opacity}" />
-				{/each}
+				{#if $queryResult.isLoading || $queryResult.isFetchingNextPage}
+					{#each [1, 0.5, 0.25, 0.1, 1, 0.5, 0.25, 0.1, 1, 0.5, 0.25, 0.1] as opacity}
+						<PlaylistSummarySkeleton style="opacity: {opacity}" />
+					{/each}
+				{/if}
 			{/if}
-		{/if}
-	</div>
+		</div>
+	</ScrollableContainer>
 </div>
 
 <style>
@@ -159,10 +183,8 @@
 		display: flex;
 		flex-direction: column;
 	}
-	.playlists {
-		flex: 1;
-	}
-	.input-container {
+
+	/* .input-container {
 		border-radius: 4px;
 		border: solid 2px var(--color-mbg);
 		display: flex;
@@ -185,11 +207,12 @@
 
 	.input-container:focus-within {
 		border-color: var(--color-positive);
-	}
+	} */
+
 	.playlists {
 		width: 100%;
-
 		overflow-y: auto;
+		flex: 1;
 	}
 
 	.noresult-message {
@@ -197,6 +220,7 @@
 		text-align: center;
 		padding: 12px;
 	}
+
 	.help-link {
 		border: none;
 		padding-top: 8px;

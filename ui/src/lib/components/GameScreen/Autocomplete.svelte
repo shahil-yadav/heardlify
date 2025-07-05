@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Search from '../icons/search.svg';
+	import Search from '../icons/search.svelte';
 	import Times from '../icons/Times.svelte';
 	import type { IOption } from '../../types/IOption';
 

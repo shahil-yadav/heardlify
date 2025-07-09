@@ -5,3 +5,6 @@
   from = "/search-playlists"
   to = "/.netlify/functions/search-playlists"
   status = 200
+[dev]
+  port = 3000
+  staticServerPort = 3999

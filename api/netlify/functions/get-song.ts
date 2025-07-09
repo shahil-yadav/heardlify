@@ -7,6 +7,8 @@ import spotifyApi from '$/utils/spotify-api';
 import mongodbApi from '$/utils/mongodb-api';
 import jsonifyError from '$/utils/jsonify-error';
 import NetlifyFunctionHelpers from '$/utils/netlify-function-helpers';
+import deezerApi from 'deezer-ts-api';
+
 interface IResult {
 	answer: IDetailedOption;
 	options: IDetailedOption[];
@@ -100,13 +102,37 @@ function setResultInCache(keys: ICacheKeys, value: IResult) {
 
 async function getResultFresh(keys: ICacheKeys): Promise<IResult> {
 	const { fullDaysSinceEpoch, playlistId } = keys;
-	const authToken = await getSpotifyToken();
-	const allPlaylistTracks = await spotifyApi.playlists.getAllTracksExpensively(
-		playlistId,
-		authToken.access_token
-	);
 
-	const playlist = await spotifyApi.playlists.getOne(playlistId, authToken.access_token);
+	const playlist = await deezerApi.getPlaylist(Number(playlistId));
+	const allPlaylistTracks: IDetailedOption[] = [];
+
+	for (const track of playlist.tracks.data) {
+		const format: IDetailedOption = {
+			imgSrc: track.album.cover,
+			// TODO: I don't have year in response 😭
+			year: 1000,
+			previewUrl: track.preview,
+			artists: {
+				list: [{ id: track.artist.id.toString(), name: track.artist.name }],
+				formatted: track.artist.name
+			},
+
+			// TODO: Figure out what is formatted attribute do ??
+			formatted: track.title,
+			name: track.title,
+
+			id: track.id.toString()
+		};
+		allPlaylistTracks.push(format);
+	}
+
+	// const authToken = await getSpotifyToken();
+	// const allPlaylistTracks = await spotifyApi.playlists.getAllTracksExpensively(
+	// 	playlistId,
+	// 	authToken.access_token
+	// );
+
+	// const playlist = await spotifyApi.playlists.getOne(playlistId, authToken.access_token);
 	const totalCount = allPlaylistTracks.length;
 
 	const index = fullDaysSinceEpoch % totalCount;
@@ -116,8 +142,10 @@ async function getResultFresh(keys: ICacheKeys): Promise<IResult> {
 		answer,
 		options: allPlaylistTracks,
 		playlist: {
-			name: playlist.name,
-			imageUrl: playlist.images[playlist.images.length - 1]?.url
+			// name: playlist.name,
+			// imageUrl: playlist.images[playlist.images.length - 1]?.url
+			name: playlist.title,
+			imageUrl: playlist.picture
 		}
 	};
 

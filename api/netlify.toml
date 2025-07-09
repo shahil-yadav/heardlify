@@ -5,3 +5,7 @@
   from = "/*"
   to = "/.netlify/functions/:splat"
   status = 200
+
+[dev]
+  port = 3001
+  staticServerPort = 4000
